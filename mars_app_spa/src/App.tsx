@@ -1,7 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, createContext, useContext} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import nasa_image from './nasa_img.png';
+
+interface ContextType {
+    increase: () => void;
+    count: number;
+}
+
+const context = createContext<ContextType | null>(null);
 
 function App() {
   return (
@@ -88,7 +95,7 @@ function ButtonClicks2() {
 }
 
 function Component1() {
-    const [count, setCount] = useState(0);
+    const [count, setCount] = useState<number>(0);
 
     useEffect(() => {
         const initialValue = localStorage.getItem("count");
@@ -97,7 +104,7 @@ function Component1() {
         }
     }, []);
 
-    const increase = () => {
+    const increase = (): void => {
         setCount(prevCount => {
             const newCount = Number(prevCount) + 1;
             localStorage.setItem("count", String(newCount));
@@ -105,37 +112,48 @@ function Component1() {
         });
     }
 
+    const contextValue: ContextType = {increase, count};
+
     return (
         <div>
-            <Component2 clickMethod={increase}/>
-            <Component3 count={count}/>
+            <context.Provider value={contextValue}>
+                <Component2 />
+                <Component3 />
+            </context.Provider>
+
         </div>
     )
 }
 
-function Component2(params: {clickMethod: React.MouseEventHandler<HTMLButtonElement>; }) {
+function Component2() {
+    const contextComponent2 = useContext(context);
+
+    // @ts-ignore
     return (
         <div>
-            <button onClick={params.clickMethod}>
+            <button onClick={contextComponent2?.increase}>
                 Click Here
             </button>
         </div>
     )
 }
 
-function Component3(params: { count: number; }) {
+function Component3() {
     return (
         <div>
-            <Component4 count={params.count}/>
+            <Component4 />
             <p>This message comes from Component 3</p>
         </div>
     )
 }
 
-function Component4(params: { count: number; }) {
+function Component4() {
+    const contextComponent4 = useContext(context);
+
+    // @ts-ignore
     return (
         <div>
-            <p>You clicked {params.count} times</p>
+            <p>You clicked {contextComponent4?.count} times</p>
         </div>
     )
 }

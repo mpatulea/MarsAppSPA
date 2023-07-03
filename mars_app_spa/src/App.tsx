@@ -1,6 +1,6 @@
 import React, {useState, useEffect, createContext, useContext} from 'react';
 import logo from './logo.svg';
-import './App.css';
+import './App.scss';
 import nasa_image from './nasa_img.png';
 import {BrowserRouter as Router, Route, Routes, Link} from "react-router-dom";
 
@@ -137,7 +137,6 @@ function Component1() {
                 <Component2 />
                 <Component3 />
             </context.Provider>
-
         </div>
     )
 }
@@ -172,7 +171,5 @@ function Component4() {
         </div>
     )
 }
-
-
 
 export default App;

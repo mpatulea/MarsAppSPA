@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import './App.scss';
 import nasa_image from './nasa_img.png';
 import {BrowserRouter as Router, Route, Routes, Link} from "react-router-dom";
+import Select from 'react-select';
+import axios from 'axios';
 
 interface ContextType {
     increase: () => void;
@@ -20,6 +22,7 @@ function App() {
                 <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
                     Learn React
                 </a>
+                <SelectComponent />
                 <Routes>
                     <Route path={'/version1'} element={<ButtonClicks1 />}>
 
@@ -170,6 +173,29 @@ function Component4() {
             <p>You clicked {contextComponent4?.count} times</p>
         </div>
     )
+}
+
+function SelectComponent() {
+    const [rovers, setRovers] = useState<Array<any> | null>(null);
+
+    useEffect(() => {
+        axios.get('https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=Zf0E0azedulQuZTTxs4FebI0VrmtRufv3WQ2ymCn')
+            .then(res => {
+                const rovers: Array<any> = res.data['rovers'];
+                setRovers(rovers);
+                console.log(rovers);
+            })
+    }, []);
+
+    const options = rovers?.map((item, index) => (
+        {value: index, label: item.name}
+    ));
+
+    return (
+        <div>
+            <Select options={options} />
+        </div>
+    );
 }
 
 export default App;

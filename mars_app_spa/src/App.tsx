@@ -2,6 +2,7 @@ import React, {useState, useEffect, createContext, useContext} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import nasa_image from './nasa_img.png';
+import {BrowserRouter as Router, Route, Routes, Link} from "react-router-dom";
 
 interface ContextType {
     increase: () => void;
@@ -9,24 +10,40 @@ interface ContextType {
 }
 
 const context = createContext<ContextType | null>(null);
-
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <NASAInformation/>
-          <Component1/>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <div className="App">
+          <header className="App-header">
+            <Router>
+                <img src={logo} className="App-logo" alt="logo" />
+                <NASAInformation/>
+                <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
+                    Learn React
+                </a>
+                <Routes>
+                    <Route path={'/version1'} element={<ButtonClicks1 />}>
+
+                    </Route>
+                    <Route path={'/version2'} element={<ButtonClicks2 />}>
+
+                    </Route>
+                    <Route path={'/version3'} element={<Component1 />}>
+
+                    </Route>
+                    <Route path={''} element={
+                        <div>
+                          <Link to={'/version1'}>Version 1</Link>
+                          <br/>
+                          <Link to={'/version2'}>Version 2</Link>
+                          <br/>
+                          <Link to={'/version3'}>Version 3</Link>
+                        </div>
+                    }>
+                    </Route>
+                </Routes>
+            </Router>
+          </header>
+      </div>
   );
 }
 
@@ -128,7 +145,6 @@ function Component1() {
 function Component2() {
     const contextComponent2 = useContext(context);
 
-    // @ts-ignore
     return (
         <div>
             <button onClick={contextComponent2?.increase}>
@@ -150,12 +166,13 @@ function Component3() {
 function Component4() {
     const contextComponent4 = useContext(context);
 
-    // @ts-ignore
     return (
         <div>
             <p>You clicked {contextComponent4?.count} times</p>
         </div>
     )
 }
+
+
 
 export default App;

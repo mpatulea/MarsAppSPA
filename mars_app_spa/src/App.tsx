@@ -3,7 +3,6 @@ import logo from './logo.svg';
 import './App.scss';
 import nasa_image from './nasa_img.png';
 import {BrowserRouter as Router, Route, Routes, Link} from "react-router-dom";
-import Select from 'react-select';
 import axios from 'axios';
 
 interface ContextType {
@@ -183,17 +182,61 @@ function SelectComponent() {
             .then(res => {
                 const rovers: Array<any> = res.data['rovers'];
                 setRovers(rovers);
-                console.log(rovers);
             })
     }, []);
 
-    const options = rovers?.map((item, index) => (
+    const roverNames = rovers?.map((item, index) => (
         {value: index, label: item.name}
     ));
 
+    const [selectedRover, setSelectedRover] = useState<string>(roverNames?.[0].label);
+
+    const handleChangeRover = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+        setSelectedRover(event.target.value);
+    };
+
+    const [selectedCamera, setSelectedCamera] = useState<string>('select camera type');
+
+    const [cameraTypes, setCameraTypes] = useState<{cameraName: string, cameraFullName: string}[]>([]);
+
+    useEffect(() => {
+        let localCameras: {cameraName: string, cameraFullName: string}[] = [];
+
+        for(let i = 0; i < 4; i++) {
+            if (i == +selectedRover) {
+                const cameras = rovers?.[i].cameras;
+                for (let j = 0; j < cameras.length; j++) {
+                    const cameraName = cameras[j].name;
+                    const cameraFullName = cameras[j].full_name;
+                    localCameras.push({cameraName, cameraFullName});
+                }
+                setCameraTypes(localCameras);
+                return;
+            }
+        }
+    })
+
+    const handleChangeCamera = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+        setSelectedCamera(event.target.value);
+    };
+
     return (
         <div>
-            <Select options={options} />
+            <select value={selectedRover} onChange={handleChangeRover}>
+                {roverNames?.map(option => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+            <br/>
+            <select value={selectedCamera} onChange={handleChangeCamera}>
+                {cameraTypes.map(option => (
+                    <option key={option.cameraName} value={option.cameraName}>
+                        {option.cameraFullName}
+                    </option>
+                ))}
+            </select>
         </div>
     );
 }

@@ -32,7 +32,7 @@ function App() {
                         <Route path={'/version2'} element={<ClickCounter2 />}>
 
                         </Route>
-                        <Route path={'/version3'} element={<Component1/>}>
+                        <Route path={'/version3'} element={<Component1 />}>
 
                         </Route>
                         <Route path={''} element={

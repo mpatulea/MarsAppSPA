@@ -1,9 +1,11 @@
 import React, {useState, useEffect, createContext, useContext} from 'react';
 import logo from './logo.svg';
 import './App.scss';
-import nasa_image from './nasa_img.png';
 import {BrowserRouter as Router, Route, Routes, Link} from "react-router-dom";
 import axios from 'axios';
+import NASAInformation from "./components/NASAInformation";
+import ClickCounter1 from "./components/ClickCounter1";
+import ClickCounter2 from "./components/ClickCounter2";
 
 interface ContextType {
     increase: () => void;
@@ -11,104 +13,41 @@ interface ContextType {
 }
 
 const context = createContext<ContextType | null>(null);
+
 function App() {
-  return (
-      <div className="App">
-          <header className="App-header">
-            <Router>
-                <img src={logo} className="App-logo" alt="logo" />
-                <NASAInformation/>
-                <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-                    Learn React
-                </a>
-                <SelectComponent />
-                <Routes>
-                    <Route path={'/version1'} element={<ButtonClicks1 />}>
-
-                    </Route>
-                    <Route path={'/version2'} element={<ButtonClicks2 />}>
-
-                    </Route>
-                    <Route path={'/version3'} element={<Component1 />}>
-
-                    </Route>
-                    <Route path={''} element={
-                        <div>
-                          <Link to={'/version1'}>Version 1</Link>
-                          <br/>
-                          <Link to={'/version2'}>Version 2</Link>
-                          <br/>
-                          <Link to={'/version3'}>Version 3</Link>
-                        </div>
-                    }>
-                    </Route>
-                </Routes>
-            </Router>
-          </header>
-      </div>
-  );
-}
-
-function TemplateComponent(props: { img: string, title: string, p1: string, p2: string; }) {
     return (
-        <div>
-            <h1>{props.title}</h1>
-            <p>
-                {props.p1}
-            </p>
-            <p>
-                {props.p2}
-            </p>
+        <div className="App">
+            <header className="App-header">
+                <Router>
+                    <img src={logo} className="App-logo" alt="logo"/>
+                    <NASAInformation/>
+                    <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
+                        Learn React
+                    </a>
+                    <SelectComponent/>
+                    <Routes>
+                        <Route path={'/version1'} element={<ClickCounter1 />}>
 
-            <img src={props.img} alt={'image'} id={'img'}/>
-        </div>
+                        </Route>
+                        <Route path={'/version2'} element={<ClickCounter2 />}>
 
-    )
-}
+                        </Route>
+                        <Route path={'/version3'} element={<Component1/>}>
 
-function NASAInformation() {
-  return (
-      <div>
-          <TemplateComponent title='Some NASA information' p1={'paragraph 1'} p2={'paragraph 2'} img={nasa_image}/>
-      </div>
-  )
-}
-
-function ButtonClicks1() {
-    const [count, setCount] = useState(0);
-
-    return (
-        <div>
-            <p>You clicked {count} times</p>
-            <button onClick={() => setCount(count + 1)}>
-                Click Here!
-            </button>
-        </div>
-    );
-}
-
-function ButtonClicks2() {
-    const [count, setCount] = useState(0);
-
-    useEffect(() => {
-        const initialValue = localStorage.getItem("count");
-        if (initialValue) {
-            setCount(+initialValue);
-        }
-    }, []);
-
-    return (
-        <div>
-            <p>You clicked {count} times</p>
-            <button onClick={() => {
-                setCount(prevCount => {
-                    const newCount = Number(prevCount) + 1;
-                    localStorage.setItem("count", String(newCount));
-                    return newCount;
-                });
-            }}>
-                Click Here
-            </button>
+                        </Route>
+                        <Route path={''} element={
+                            <div>
+                                <Link to={'/version1'}>Version 1</Link>
+                                <br/>
+                                <Link to={'/version2'}>Version 2</Link>
+                                <br/>
+                                <Link to={'/version3'}>Version 3</Link>
+                            </div>
+                        }>
+                        </Route>
+                    </Routes>
+                </Router>
+            </header>
         </div>
     );
 }
@@ -202,8 +141,8 @@ function SelectComponent() {
     useEffect(() => {
         let localCameras: {cameraName: string, cameraFullName: string}[] = [];
 
-        for(let i = 0; i < 4; i++) {
-            if (i == +selectedRover) {
+        for (let i = 0; i < 4; i++) {
+            if (i === +selectedRover) {
                 const cameras = rovers?.[i].cameras;
                 for (let j = 0; j < cameras.length; j++) {
                     const cameraName = cameras[j].name;
@@ -214,11 +153,43 @@ function SelectComponent() {
                 return;
             }
         }
-    })
+    }, [selectedRover, rovers])
 
     const handleChangeCamera = (event: { target: { value: React.SetStateAction<string>; }; }) => {
         setSelectedCamera(event.target.value);
     };
+
+    const [photos, setPhotos] = useState<Array<any>>([]);
+
+    const displayPhotos = () => {
+
+        let roverName = '';
+        if (+selectedRover === 0) {
+            roverName = 'curiosity';
+        } else if (+selectedRover === 1) {
+            roverName = 'spirit'
+        } else if (+selectedRover === 2) {
+            roverName = 'opportunity'
+        } else if (+selectedRover === 3) {
+            roverName = 'perseverance'
+        }
+
+        axios.get(`https://api.nasa.gov/mars-photos/api/v1/rovers/${roverName}/photos?camera=${selectedCamera}&sol=1&api_key=Zf0E0azedulQuZTTxs4FebI0VrmtRufv3WQ2ymCn`)
+            .then(res => {
+                const photos = res.data['photos'];
+                setPhotos(photos);
+            })
+    }
+
+    const [photoPaths, setPhotoPaths] = useState<string[]>();
+
+    useEffect(() => {
+        let localPhotoPaths: string[] = [];
+        for (let i = 0; i < photos.length; i++) {
+            localPhotoPaths.push(photos[i].img_src);
+        }
+        setPhotoPaths(localPhotoPaths);
+    }, [photos]);
 
     return (
         <div>
@@ -237,6 +208,14 @@ function SelectComponent() {
                     </option>
                 ))}
             </select>
+            <button onClick={displayPhotos} value={selectedCamera}>
+                Submit
+            </button>
+            <p>{selectedRover}</p>
+            <p>{selectedCamera}</p>
+            {photoPaths?.slice(0, 5).map((path, index) => (
+                <img key={index} src={path} alt={'rover-img'} />
+            ))}
         </div>
     );
 }
